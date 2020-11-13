@@ -4,8 +4,7 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 
 data class Configuration(
-    val bot: BotInfo,
-    val responses: Array<out BotResponse>
+    val bot: BotInfo
 )
 
 data class BotInfo(
@@ -17,9 +16,4 @@ data class BotInfo(
 data class BotActivity(
     val type: Activity.ActivityType,
     val content: String
-)
-
-data class BotResponse(
-    val trigger: String,
-    val action: String
 )

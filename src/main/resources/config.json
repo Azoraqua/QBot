@@ -1,18 +1,10 @@
 {
-  "bot": {
-    "token": "Nzc2NTQzNzc0NTg3MjI0MDY0.X62avw.ZfUwOikbyv1WzW4ZZqd3udRMnNU",
-    "status": "ONLINE",
-    "activity": {
-      "type": "WATCHING",
-      "content": "The Crowd."
+    "bot": {
+        "token": "Nzc2NTQzNzc0NTg3MjI0MDY0.X62avw.ZfUwOikbyv1WzW4ZZqd3udRMnNU",
+        "status": "ONLINE",
+        "activity": {
+            "type": "WATCHING",
+            "content": "The Crowd."
+        }
     }
-  },
-
-  "responses": {
-    "java.lang.NullPointerException": "Please report bugs in #bug-reports.",
-    "java.lang.IllegalStateException": "Please report bugs in #bug-reports.",
-    "java.lang.IllegalArgumentException": "Please report bugs in #bug-reports.",
-    "java.lang.ClassNotFoundException": "Please report bugs in #bug-reports.",
-    "java.lang.NoClassDefFoundError": "Please report bugs in #bug-reports."
-  }
 }
