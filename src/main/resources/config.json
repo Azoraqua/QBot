@@ -1,10 +1,10 @@
 {
     "bot": {
-        "token": "Nzc2NTQzNzc0NTg3MjI0MDY0.X62avw.ZfUwOikbyv1WzW4ZZqd3udRMnNU",
+        "token": "BOT_TOKEN",
         "status": "ONLINE",
         "activity": {
             "type": "WATCHING",
-            "content": "The Crowd."
+            "content": "BOT_STATUS"
         }
     }
 }
