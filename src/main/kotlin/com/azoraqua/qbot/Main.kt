@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
+import net.sourceforge.tess4j.Tesseract
 import java.io.File
 import java.io.FileReader
 import java.nio.file.Files
@@ -15,6 +16,7 @@ class Main : Runnable {
     internal lateinit var CONFIG_FILE: File
     internal lateinit var CONFIG: Configuration
     internal lateinit var api: JDA
+    internal lateinit var tesseract: Tesseract
 
     fun start(args: Array<String>) {
         CONFIG_FILE = File("config.json")
@@ -24,11 +26,20 @@ class Main : Runnable {
         }
 
         CONFIG = FileReader(CONFIG_FILE).use { GSON.fromJson(it, Configuration::class.java) }
-        api = JDABuilder.createDefault(CONFIG.bot.token)
-            .setStatus(CONFIG.bot.status)
-            .setActivity(Activity.of(CONFIG.bot.activity.type, CONFIG.bot.activity.content))
-            .addEventListeners(EventManager(this))
-            .build()
+
+        thread {
+            tesseract = Tesseract()
+            tesseract.setDatapath("src/main/resources/data")
+            tesseract.setLanguage("eng")
+        }
+
+        thread {
+            api = JDABuilder.createDefault(CONFIG.bot.token)
+                .setStatus(CONFIG.bot.status)
+                .setActivity(Activity.of(CONFIG.bot.activity.type, CONFIG.bot.activity.content))
+                .addEventListeners(EventManager(this))
+                .build()
+        }
     }
 
     override fun run() {

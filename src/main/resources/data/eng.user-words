@@ -1,0 +1,9 @@
+IllegalArgumentException
+IllegalStateException
+NullPointerException
+ClassNotFoundException
+RuntimeException
+Exception
+NoClassDefFoundError
+OutOfMemoryError
+Error

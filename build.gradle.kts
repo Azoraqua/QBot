@@ -20,6 +20,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.0-alpha1")
     implementation("org.slf4j:slf4j-simple:2.0.0-alpha1")
     implementation("com.google.code.gson:gson:2.8.5")
+    implementation("net.sourceforge.tess4j:tess4j:4.5.3")
 }
 
 configure<JavaPluginConvention> {
