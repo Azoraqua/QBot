@@ -17,7 +17,7 @@ import java.util.regex.Pattern
 import javax.imageio.ImageIO
 
 class EventManager(val main: Main) : ListenerAdapter() {
-    internal val THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2)
+    internal val THREAD_POOL = Executors.newCachedThreadPool()
     internal val LOGGER = HastebinLogger()
     internal val EXCEPTION_PATTERN = Pattern.compile("((.*)(\\.))?(.*)(Exception|Error)", Pattern.MULTILINE)
 
@@ -30,38 +30,35 @@ class EventManager(val main: Main) : ListenerAdapter() {
             return
         }
 
-        THREAD_POOL.submit {
-            val text: String
+        val text: String
 
-            if (event.message.attachments.isNotEmpty()) {
-                val file = event.message.attachments[0].downloadToFile().get()
+        if (event.message.attachments.isNotEmpty()) {
+            val file = event.message.attachments[0].downloadToFile().get()
 
-                if (IMAGE_PATTERN.asMatchPredicate().test(file.name)) {
-                    text = main.tesseract.doOCR(file)
-                } else {
-                    text = Files.readString(file.toPath(), Charsets.UTF_8)
-                }
-
-                Files.delete(file.absoluteFile.toPath())
-            } else if (event.message.isImage()) {
-                text = main.tesseract.doOCR(ImageIO.read(URL(event.message.contentRaw)))
+            if (IMAGE_PATTERN.asMatchPredicate().test(file.name)) {
+                text = main.tesseract.doOCR(file)
             } else {
-                text = event.message.contentRaw
+                text = Files.readString(file.toPath(), Charsets.UTF_8)
             }
 
-            THREAD_POOL.execute {
-                if (this.isException(text) || this.hasPrefix(text, "[WARN]", "[ERROR]")) {
-                    val url = CompletableFuture.supplyAsync {
-                        LOGGER.log(text)
-                    }.get()
+            Files.delete(file.absoluteFile.toPath())
+        } else if (event.message.isImage()) {
+            text = main.tesseract.doOCR(ImageIO.read(URL(event.message.contentRaw)))
+        } else {
+            text = event.message.contentRaw
+        }
 
-                    event.message.addReaction("\uD83D\uDC40").queue {
-                        event.message.delete().queueAfter(5, TimeUnit.SECONDS) {
-                            event.message.channel.sendTyping().queue {
-                                event.message.channel.sendMessage(url).queueAfter(3, TimeUnit.SECONDS) { m ->
-                                    m.channel.sendMessage("${event.message.author.asMention} Please wait a moment. One of our staff will be with you anytime soon.")
-                                        .queue()
-                                }
+        if (this.isException(text) || this.hasPrefix(text, "[WARN]", "[ERROR]")) {
+            val url = CompletableFuture.supplyAsync {
+                LOGGER.log(text)
+            }.get()
+
+            CompletableFuture.runAsync {
+                event.message.addReaction("\uD83D\uDC40").queue {
+                    event.message.delete().queueAfter(5, TimeUnit.SECONDS) {
+                        event.message.channel.sendTyping().queue {
+                            event.message.channel.sendMessage(url).queueAfter(3, TimeUnit.SECONDS) { m ->
+                                m.channel.sendMessage("${event.message.author.asMention} Please wait a moment. One of our staff will be with you anytime soon.").queue()
                             }
                         }
                     }
