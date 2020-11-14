@@ -29,7 +29,7 @@ class Main : Runnable {
 
         thread {
             tesseract = Tesseract()
-            tesseract.setDatapath("src/main/resources/data")
+            tesseract.setDatapath("src/main/resources/data") // Replace with actual path.
             tesseract.setLanguage("eng")
         }
 

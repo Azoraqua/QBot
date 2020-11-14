@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     java
+    maven
     kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "6.1.0"
 }
@@ -12,6 +13,7 @@ version = "1.0.0-SNAPSHOT"
 repositories {
     mavenCentral()
     jcenter()
+    maven("https://oss.sonatype.org/content/groups/public/")
 }
 
 dependencies {
@@ -19,6 +21,7 @@ dependencies {
     implementation("net.dv8tion:JDA:4.2.0_215")
     implementation("org.slf4j:slf4j-api:2.0.0-alpha1")
     implementation("org.slf4j:slf4j-simple:2.0.0-alpha1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
     implementation("com.google.code.gson:gson:2.8.5")
     implementation("net.sourceforge.tess4j:tess4j:4.5.3")
 }
