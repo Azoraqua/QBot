@@ -47,4 +47,12 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "11"
     }
+
+    jar {
+        manifest {
+            attributes(mapOf(
+                "Main-Class" to "com.azoraqua.qbot.MainKt"
+            ))
+        }
+    }
 }

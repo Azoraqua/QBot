@@ -4,8 +4,11 @@ import com.azoraqua.qbot.IMAGE_PATTERN
 import com.azoraqua.qbot.Main
 import com.azoraqua.qbot.isImage
 import com.azoraqua.qbot.util.HastebinLogger
+import net.dv8tion.jda.api.entities.Role
+import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.net.URL
 import java.nio.file.Files
@@ -20,9 +23,43 @@ class EventManager(val main: Main) : ListenerAdapter() {
     internal val THREAD_POOL = Executors.newCachedThreadPool()
     internal val LOGGER = HastebinLogger()
     internal val EXCEPTION_PATTERN = Pattern.compile("((.*)(\\.))?(.*)(Exception|Error)", Pattern.MULTILINE)
+    internal lateinit var EVERYONE_ROLE: Role
+    internal lateinit var MUTED_ROLE: Role
+    internal lateinit var RULES_CHANNEL: TextChannel
+    internal val RULE_MESSAGE_ID = 723865660622372915
+    internal val OK_EMOJI = "✅"
+    internal val NOPE_EMOJI = "❌"
 
     override fun onReady(event: ReadyEvent) {
         println("Bot ${main.api.selfUser.asTag} is ready.")
+
+        EVERYONE_ROLE = main.api.getRoleById(464296649330655244)!!
+        MUTED_ROLE = main.api.getRoleById(627957483423399937)!!
+        RULES_CHANNEL = main.api.getGuildChannelById(723864929744060497) as TextChannel
+        RULES_CHANNEL.clearReactionsById(RULE_MESSAGE_ID).queue()
+        RULES_CHANNEL.addReactionById(RULE_MESSAGE_ID, OK_EMOJI).queue()
+        RULES_CHANNEL.addReactionById(RULE_MESSAGE_ID, NOPE_EMOJI).queue()
+
+//        RULES_CHANNEL.guild.channels.forEach {ch ->
+//            ch.members.forEach { m ->
+//                ch.createPermissionOverride(m)
+//                    .deny(Permission.VIEW_CHANNEL)
+//            }
+//        }
+    }
+
+    override fun onMessageReactionAdd(event: MessageReactionAddEvent) {
+        if (event.user == main.api.selfUser) {
+            return
+        }
+
+//        if (event.reactionEmote.emoji == OK_EMOJI) {
+//            event.guild.addRoleToMember(event.userId, MEMBER_ROLE).queue()
+//        } else if (event.reactionEmote.emoji == NOPE_EMOJI) {
+//            event.guild.addRoleToMember(event.userId, MUTED_ROLE).queue()
+//        }
+
+//        event.reaction.removeReaction(event.user!!).queue()
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
@@ -32,20 +69,24 @@ class EventManager(val main: Main) : ListenerAdapter() {
 
         val text: String
 
-        if (event.message.attachments.isNotEmpty()) {
-            val file = event.message.attachments[0].downloadToFile().get()
+        when {
+            event.message.attachments.isNotEmpty() -> {
+                val file = event.message.attachments[0].downloadToFile().get()
 
-            if (IMAGE_PATTERN.asMatchPredicate().test(file.name)) {
-                text = main.tesseract.doOCR(file)
-            } else {
-                text = Files.readString(file.toPath(), Charsets.UTF_8)
+                text = if (IMAGE_PATTERN.asMatchPredicate().test(file.name)) {
+                    main.tesseract.doOCR(file)
+                } else {
+                    Files.readString(file.toPath(), Charsets.UTF_8)
+                }
+
+                Files.delete(file.absoluteFile.toPath())
             }
-
-            Files.delete(file.absoluteFile.toPath())
-        } else if (event.message.isImage()) {
-            text = main.tesseract.doOCR(ImageIO.read(URL(event.message.contentRaw)))
-        } else {
-            text = event.message.contentRaw
+            event.message.isImage() -> {
+                text = main.tesseract.doOCR(ImageIO.read(URL(event.message.contentRaw)))
+            }
+            else -> {
+                text = event.message.contentRaw
+            }
         }
 
         if (this.isException(text) || this.hasPrefix(text, "[WARN]", "[ERROR]")) {

@@ -33,13 +33,11 @@ class Main : Runnable {
             tesseract.setLanguage("eng")
         }
 
-        thread {
-            api = JDABuilder.createDefault(CONFIG.bot.token)
-                .setStatus(CONFIG.bot.status)
-                .setActivity(Activity.of(CONFIG.bot.activity.type, CONFIG.bot.activity.content))
-                .addEventListeners(EventManager(this))
-                .build()
-        }
+        api = JDABuilder.createDefault(CONFIG.bot.token)
+            .setStatus(CONFIG.bot.status)
+            .setActivity(Activity.of(CONFIG.bot.activity.type, CONFIG.bot.activity.content))
+            .addEventListeners(EventManager(this))
+            .build()
     }
 
     override fun run() {
